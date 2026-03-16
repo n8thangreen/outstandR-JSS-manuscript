@@ -22,42 +22,40 @@
 
 @Manual{RemiroAzocar2022c,
   title = {{outstandR}: Outcome regression standardisation},
-  author = {A. Remiro-Azócar and N. Heath and G. Baio},
-  year = {2022},
-  note = {R package version 0.1.0},
+  author = {N. Green and A. Remiro-Azócar},
+  year = {2025},
+  note = {R package version 1.0.0},
   url = {https://statisticshealtheconomics.github.io/outstandR/},
 }
 
 @article{aari_marginaleffects_2024,
-  title = {{marginaleffects: An R Package to Estimate and Plot Predictions, Marginal Means, and Marginal Effects}},
-  author = {Arel-Bundock, Vincent},
-  date = {2024-05-15},
-  journal = {Journal of Open Source Software},
-  publisher = {The Open Journal},
-  volume = {9},
-  number = {97},
-  pages = {6224},
-  doi = {10.21105/joss.06224},
-  url = {https://joss.theoj.org/papers/10.21105/joss.06224}
+  title = {How to Interpret Statistical Models Using {marginaleffects} for {R} and {Python}},
+  author = {Vincent Arel-Bundock and Noah Greifer and Andrew Heiss},
+  journal = {Journal of Statistical Software},
+  year = {2024},
+  volume = {111},
+  number = {9},
+  pages = {1--32},
+  doi = {10.18637/jss.v111.i09},
 }
 
-@software{g_sofer_2023_10022204,
-  author = {G. Sofer, Tom and L. D., Ryan and Richardson},
-  title = {{tsa-lab/stdReg2: stdReg2}},
-  month = oct,
-  year = 2023,
-  publisher = {Zenodo},
-  version = {v1.1.0},
-  doi = {10.5281/zenodo.10022204},
-  url = {https://doi.org/10.5281/zenodo.10022204}
+@Manual{g_sofer_2023_10022204,
+  title = {stdReg2: Regression Standardization for Causal Inference},
+  author = {Michael C Sachs and Arvid Sjölander and Erin E Gabriel and Johan Sebastian Ohlendorff and Adam Brand},
+  year = {2025},
+  note = {R package version 1.0.3},
+  url = {https://sachsmc.github.io/stdReg2/},
 }
 
-@software{maicplus_2024,
-  author = {maicplus, Maintainer},
-  title = {{maicplus: Matching-Adjusted Indirect Comparison Plus}},
-  url = {https://cran.r-project.org/package=maicplus},
-  version = {0.1.0},
-  year = {2024}
+@article{maicplus_2024,
+  title = {{MAICplus}: An {R} Package to Support Analysis and Reporting of Matching Adjusted Indirect Treatment Comparisons ({MAIC}) for {HTA} Dossiers},
+  author = {Chen, G. and others},
+  journal = {Value in Health},
+  volume = {26},
+  number = {12},
+  pages = {S558},
+  year = {2023},
+  note = {Abstract SA83}
 }
 
 @article{sjolander2023gformula,
@@ -72,12 +70,151 @@
 }
 
 @article{Sterne2023,
-  author = {Jonathan A C Sterne and Rhian M Daniel and Amy M B Ferguson and Sanja Sari and Margarita Moreno-Betancur and John W R Wallace and Ian R White and Angela M Wood and Kate Tilling},
-  title = {A unified framework for multiple imputation and missing data in the parametric g-formula},
+  title = {{G}-formula with multiple imputation for causal inference with incomplete data},
+  author = {Bartlett, J. W. and Olarte Parra, C. and Granger, E. and Keogh, R. H. and van Zwet, E. W. and Daniel, R. M.},
+  journal = {Statistical Methods in Medical Research},
+  volume = {34},
+  number = {6},
+  pages = {1130--1143},
+  year = {2025},
+  month = {jun},
+  doi = {10.1177/09622802251316971},
+  note = {PMID: 40165440; PMCID: PMC12209542}
+}
+
+@article{phillippo_multinma_2020,
+  title = {Multilevel Network Meta-Regression for Population-Adjusted Treatment Comparisons},
+  author = {Phillippo, David M and Ades, A E and Dias, Sofia and Palmer, Stephen and Abrams, Keith R and Welton, Nicky J},
+  journal = {Journal of the Royal Statistical Society: Series A (Statistics in Society)},
+  year = {2020},
+  volume = {183},
+  number = {3},
+  pages = {1189--1210},
+  doi = {10.1111/rssa.12579}
+}
+
+@book{rubin1987,
+  title={Multiple Imputation for Nonresponse in Surveys},
+  author={Rubin, Donald B.},
+  year={1987},
+  publisher={John Wiley \& Sons},
+  address={New York},
+  isbn={9780471087052}
+}
+
+@misc{campbell2025,
+      title={Doubly robust augmented weighting estimators for the analysis of externally controlled single-arm trials and unanchored indirect treatment comparisons}, 
+      author={Harlan Campbell and Antonio Remiro-Azócar},
+      year={2025},
+      eprint={2505.00113},
+      archivePrefix={arXiv},
+      primaryClass={stat.ME},
+      url={https://arxiv.org/abs/2505.00113}, 
+}
+
+@Manual{survivalpkg,
+  title = {A Package for Survival Analysis in R},
+  author = {Terry M. Therneau},
+  year = {2024},
+  note = {R package version 3.7-0},
+  url = {https://CRAN.R-project.org/package=survival},
+}
+
+@article{signorovitch2010,
+  author = {Signorovitch, J. E. and Wu, E. Q. and Yu, A. P. and others},
+  title = {Comparative effectiveness without head-to-head trials: a method for matching-adjusted indirect comparisons applied to psoriasis treatment with adalimumab or etanercept},
+  journal = {PharmacoEconomics},
+  year = {2010},
+  volume = {28},
+  number = {10},
+  pages = {935--945},
+  doi = {10.2165/11538370-000000000-00000}
+}
+
+@article{caro2010,
+  author = {Caro, J. J. and Ishak, K. J.},
+  title = {No head-to-head trial? Simulate the missing arms},
+  journal = {PharmacoEconomics},
+  year = {2010},
+  volume = {28},
+  number = {10},
+  pages = {957--967},
+  doi = {10.2165/11538350-000000000-00000}
+}
+
+@article{ishak2015,
+  author = {Ishak, K. J. and Proskorovsky, I. and Benedict, A.},
+  title = {Simulation and matching-based approaches for indirect comparison of treatments},
+  journal = {PharmacoEconomics},
+  year = {2015},
+  volume = {33},
+  number = {6},
+  pages = {537--549},
+  doi = {10.1007/s40273-015-0271-1}
+}
+
+@article{phillippo2021target,
+  author = {Phillippo, D. M. and Dias, S. and Ades, A. E. and Welton, N. J.},
+  title = {Target estimands for efficient decision making: Response to comments on ``Assessing the performance of population adjustment methods for anchored indirect comparisons: A simulation study''},
   journal = {Statistics in Medicine},
-  year = {2023},
-  volume = {42},
-  number = {24},
-  pages = {4455-4470},
-  doi = {10.1002/sim.9863}
+  year = {2021},
+  volume = {40},
+  number = {11},
+  pages = {2759--2763},
+  doi = {10.1002/sim.8965}
+}
+
+@article{remiro2021conflating,
+  author = {Remiro-Az{\'o}car, A. and Heath, A. and Baio, G.},
+  title = {Conflating marginal and conditional treatment effects: Comments on ``Assessing the performance of population adjustment methods for anchored indirect comparisons: A simulation study''},
+  journal = {Statistics in Medicine},
+  year = {2021},
+  volume = {40},
+  number = {11},
+  pages = {2753--2758},
+  doi = {10.1002/sim.8857}
+}
+
+@article{phillippo2025effect,
+  author = {Phillippo, David M. and Remiro-Az{\'o}car, Antonio and Heath, Anna and Baio, Gianluca and Dias, Sofia and Ades, A. E. and Welton, Nicky J.},
+  title = {Effect modification and non-collapsibility together may lead to conflicting treatment decisions: {A} review of marginal and conditional estimands and recommendations for decision-making},
+  journal = {Research Synthesis Methods},
+  year = {2025},
+  volume = {16},
+  pages = {323--349},
+  doi = {10.1017/rsm.2025.2}
+}
+
+@article{Phillippo2016DSU,
+author = {Phillippo, David M. and Ades, A E and Dias, Sofia and Palmer, Stephen and Abrams, Keith R and Welton, Nicky J},
+file = {:C\:/Users/n8tha/AppData/Local/Mendeley Ltd./Mendeley Desktop/Downloaded/Phillippo et al. - 2016 - NICE DSU TECHNICAL SUPPORT DOCUMENT 18 METHODS FOR POPULATION-ADJUSTED INDIRECT COMPARISONS IN SUBMISSIONS TO.pdf:pdf},
+journal = {NICE DSU Tech. Support Doc. 18},
+number = {December},
+pages = {1--82},
+title = {{NICE DSU Technical Support Document 18: Methods for Population-Adjusted Indirect Comparisons in Submissions To NICE}},
+url = {http://www.nicedsu.org.uk/Populationadjusted-ICs-TSD(3026862).htm},
+year = {2016}
+}
+
+@incollection{remiro2025marginal,
+  author = {Remiro-Az{\'o}car, Antonio and Phillippo, David M. and Welton, Nicky J. and Dias, Sofia and Ades, Anthony E. and Heath, Anna and Baio, Gianluca},
+  title = {Marginal and Conditional Summary Measures: Transportability and Compatibility Across Studies},
+  booktitle = {Wiley StatsRef: Statistics Reference Online},
+  year = {2025},
+  month = {dec},
+  publisher = {John Wiley \& Sons, Ltd},
+  doi = {10.1002/9781118445112.stat08659},
+  isbn = {9781118445112}
+}
+
+@article{efron1979bootstrap,
+  title={Bootstrap Methods: Another Look at the Jackknife},
+  author={Efron, Bradley},
+  journal={The Annals of Statistics},
+  volume={7},
+  number={1},
+  pages={1--26},
+  year={1979},
+  publisher={Institute of Mathematical Statistics},
+  doi={10.1214/aos/1176344552}
 }

@@ -1,11 +1,11 @@
 %%
 %% This is file `jss.cls',
-\def\fileversion{3.3}
+\def\fileversion{2.2}
 \def\filename{jss}
-\def\filedate{2021/05/23}
+\def\filedate{2013/04/06}
 %%
 %% Package `jss' to use with LaTeX2e for JSS publications (http://www.jstatsoft.org/)
-%% License: GPL-2 | GPL-3
+%% License: GPL-2
 %% Copyright: (C) Achim Zeileis
 %% Please report errors to Achim.Zeileis@R-project.org
 %%
@@ -51,10 +51,9 @@
 \ProcessOptions
 \LoadClass[11pt,a4paper,twoside]{article}
 %% required packages
-\RequirePackage{graphicx,xcolor,ae,fancyvrb}
+\RequirePackage{graphicx,color,ae,fancyvrb}
 \RequirePackage[T1]{fontenc}
 \IfFileExists{upquote.sty}{\RequirePackage{upquote}}{}
-\IfFileExists{lmodern.sty}{\RequirePackage{lmodern}}{}
 %% bibliography
 \if@shortnames
   \usepackage[authoryear,round]{natbib}
@@ -105,7 +104,6 @@
 \newcommand{\Plainreviewer}[1]{\def\@Plainreviewer{#1}}
 \newcommand{\Softwaretitle}[1]{\def\@Softwaretitle{#1}}
 \newcommand{\URL}[1]{\def\@URL{#1}}
-\newcommand{\DOI}[1]{\def\@DOI{#1}}
 %% for internal use
 \newcommand{\Seriesname}[1]{\def\@Seriesname{#1}}
 \newcommand{\Hypersubject}[1]{\def\@Hypersubject{#1}}
@@ -120,7 +118,7 @@
 \Abstract{---!!!---an abstract is required---!!!---}
 \Plainauthor{\@author}
 \Volume{VV}
-\Year{YYYY}
+\Year{2025}
 \Month{MMMMMM}
 \Issue{II}
 \Submitdate{yyyy-mm-dd}
@@ -144,7 +142,6 @@
 \Pages{xv + 123}
 \Price{USD 69.95 (P)}
 \URL{http://link/to/webpage/}
-\DOI{10.18637/jss.v000.i00}
 \if@article
   \Seriesname{Issue}
   \Hypersubject{Journal of Statistical Software}
@@ -231,13 +228,13 @@
     {\fontfamily{pzc} \fontsize{13}{15} \selectfont Journal of Statistical Software}
     \hfill
     \url{http://www.jstatsoft.org/}\\ \nopagebreak
-    published by the Foundation for Open Access Statistics
+    published by the American Statistical Association
     \hfill
-    \url{http://www.foastat.org/}\\[.3\baselineskip] \nopagebreak
-    {\@Month{} \@Year, Volume~\@Volume, \@Seriesname~\@Issue}
+    \url{http://www.amstat.org/}\\[.3\baselineskip] \nopagebreak
+    {Volume~\@Volume, \@Seriesname~\@Issue}
     \hfill
     \@Firstdate\\ \nopagebreak
-    {\href{https://doi.org/\@DOI}{\tt doi:\@DOI}}
+    {\@Month{} \@Year}
     \hfill
     \@Seconddate  \nopagebreak
     \vspace{.3\baselineskip}
@@ -261,7 +258,7 @@
    {\fontfamily{pzc} \fontsize{28}{32} \selectfont Journal of Statistical Software}
    \vfill
    {\it \small \@Month{} \@Year, Volume~\@Volume, \@Seriesname~\@Issue.%
-            \hfill \href{https://doi.org/\@DOI}{doi:\,\@DOI}}}\\[0.1cm]
+            \hfill \href{http://www.jstatsoft.org/}{http://www.jstatsoft.org/}}}\\[0.1cm]
      \hrule height 3pt}}
 \if@review
   \renewcommand{\maketitle}{
@@ -467,20 +464,20 @@
 \if@notitle
   %% \AtBeginDocument{\maketitle}
 \else
-  \@ifundefined{AddToHook}{\AtBeginDocument{\maketitle}}{\AddToHook{begindocument}[maketitle]{\maketitle}}
+  \AtBeginDocument{\maketitle}
 \fi
 %% commands
 \newcommand\code{\bgroup\@makeother\_\@makeother\~\@makeother\$\@codex}
 \def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
 %%\let\code=\texttt
 \let\proglang=\textsf
-\newcommand{\pkg}[1]{{\fontseries{m}\fontseries{b}\selectfont #1}}
+\newcommand{\pkg}[1]{{\fontseries{b}\selectfont #1}}
 \newcommand{\email}[1]{\href{mailto:#1}{\normalfont\texttt{#1}}}
 \ifx\csname urlstyle\endcsname\relax
   \newcommand\@doi[1]{doi:\discretionary{}{}{}#1}\else
   \newcommand\@doi{doi:\discretionary{}{}{}\begingroup
 \urlstyle{tt}\Url}\fi
-\newcommand{\doi}[1]{\href{https://doi.org/#1}{\normalfont\texttt{\@doi{#1}}}}
+\newcommand{\doi}[1]{\href{http://dx.doi.org/#1}{\normalfont\texttt{\@doi{#1}}}}
 \newcommand{\E}{\mathsf{E}}
 \newcommand{\VAR}{\mathsf{VAR}}
 \newcommand{\COV}{\mathsf{COV}}
