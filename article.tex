@@ -14,7 +14,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% declarations for jss.cls
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% almost as usual
@@ -31,7 +31,10 @@
 
 %% an abstract and keywords
 \Abstract{
-Indirect treatment comparisons (ITCs) are essential in Health Technology Assessment (HTA) when head-to-head clinical trials are absent. A common challenge arises when attempting to compare a treatment with available individual patient data (IPD) against a competitor with only reported aggregate-level data (ALD), particularly when trial populations differ in effect modifiers. While methods such as Matching-Adjusted Indirect Comparison (MAIC) and Simulated Treatment Comparison (STC) exist to adjust for these cross-trial differences, software implementations have often been fragmented or limited in scope. This article introduces \pkg{outstandR}, an \proglang{R} package designed to provide a comprehensive and unified framework for population-adjusted indirect comparison (PAIC). \pkg{outstandR} implements advanced G-computation methods—within both maximum likelihood and Bayesian frameworks, and Multiple Imputation Marginalization (MIM) to address non-collapsibility and missing data. By streamlining the workflow of covariate simulation, model standardization, and contrast estimation, \pkg{outstandR} enables robust and compatible evidence synthesis in complex decision-making scenarios.
+Indirect treatment comparisons (ITCs) are essential in Health Technology Assessment (HTA) when head-to-head clinical trials are absent. A common challenge arises when attempting to compare a treatment with available individual patient data (IPD) against a competitor with only reported aggregate-level data (ALD), particularly when trial populations differ in effect modifiers. While methods such as Matching-Adjusted Indirect Comparison (MAIC) exist to adjust for these cross-trial differences, they are increasingly being superseded by regression-based marginalization methods. Historically, software implementations for these methods have often been fragmented or limited in scope.
+
+
+This article introduces \pkg{outstandR}, an \proglang{R} package designed to provide a comprehensive and unified framework for population-adjusted indirect comparison (PAIC). \pkg{outstandR} implements advanced G-computation methods—within both maximum likelihood and Bayesian frameworks, and Multiple Imputation Marginalization (MIM) to address non-collapsibility and missing data. By streamlining the workflow of covariate simulation, model standardization, and contrast estimation, \pkg{outstandR} enables robust and compatible evidence synthesis in complex decision-making scenarios.
 }
 \Keywords{G-computation, simulated treatment comparison, matching-adjusted indirect comparison, Bayesian, multiple imputation, \proglang{R}}
 \Plainkeywords{g-computation, simulated treatment comparison, matching-adjusted indirect comparison, bayesian, multiple imputation, R} %% without formatting
@@ -79,67 +82,75 @@ Indirect treatment comparisons (ITCs) are essential in Health Technology Assessm
 Indirect treatment comparisons (ITCs) are essential in Health Technology Assessment (HTA) when head-to-head clinical trials are absent. A common and significant challenge arises when attempting to compare a treatment with available individual patient data (IPD) against a competitor with only reported aggregate-level data (ALD). When trial populations differ in effect modifiers, indirect comparisons that do not adjust for covariates are biased; thus, population adjustment methods are increasingly used to bridge these cross-trial differences \citep{Phillippo2016DSU}.
 
 
-Well-established methods for this scenario include Matching-Adjusted Indirect Comparison (MAIC)  \citep{signorovitch2010} and Simulated Treatment Comparison (STC) \citep{caro2010,ishak2015}. However, these methods often face methodological limitations, such as sensitivity to poor covariate overlap (in MAIC) or the inability to extrapolate beyond observed covariate spaces. Furthermore, from a practical standpoint, software implementations for these methods have often been fragmented, limited in scope, or reliant on ad-hoc scripts.
+Well-established methods for this scenario include Matching-Adjusted Indirect Comparison (MAIC)  \citep{signorovitch2010} and Simulated Treatment Comparison (STC) \citep{caro2010,ishak2015}. However, these methods often face methodological limitations, such as sensitivity to poor covariate overlap (in MAIC) or bias. Standard MAIC typically only equates the means (first marginal moment), leaving residual confounding if the variances or joint distributions remain severely mismatched. Furthermore, from a practical standpoint, software implementations for these methods have often been fragmented, limited in scope, or reliant on ad-hoc scripts.
 
 
-To address methodological limitations, the literature has moved toward advanced approaches like G-computation \citep{RemiroAzocar2022a}, Multiple Imputation Marginalization (MIM) \citep{RemiroAzocar2022b} and Multilevel Network Meta-Regression (ML-NMR) \citep{phillippo_multinma_2020}. G-computation and MIM allows for model-based standardization via covariate simulation, overcoming limited patient-level data. There has been active debate regarding whether population-average conditional or marginal estimands are most suitable for decision-making \citep{remiro2025marginal}. While some argue for conditional estimands to increase power \citep{remiro2021conflating}, others advocate for marginal estimands \citep{phillippo2021target}. Recent syntheses and harmonisation suggest that both are valuable depending on the decision question \citep{phillippo2025effect}. Consequently, it is beneficial for analysts to have the capability to compare multiple approaches within a single analysis.
+To address methodological limitations, the literature has moved towards advanced approaches like G-computation \citep{RemiroAzocar2022a}, Multiple Imputation Marginalization (MIM) \citep{RemiroAzocar2022b} and Multilevel Network Meta-Regression (ML-NMR) \citep{phillippo_multinma_2020}. G-computation and MIM allow for model-based standardization via covariate simulation, overcoming limited patient-level data.
 
-This article introduces \pkg{outstandR}, an \proglang{R} package designed to address these inefficiencies by providing a comprehensive and unified framework for population-adjusted indirect comparison (PAIC). \pkg{outstandR} streamlines the entire workflow—from covariate simulation and model standardization to contrast estimation. Beyond standard weighting (MAIC) and regression (STC) approaches, the package implements advanced G-computation and MIM methods within both maximum likelihood and Bayesian frameworks.
+%% [ARA] But the approaches we are proposing all target a marginal estimand (except the "wrong" version of STC, which should not even considered in the first place). I would suggest removing the marginal versus conditional debate.
+%
+% There has been active debate on whether population-average conditional or marginal estimands are most suitable for decision-making. While there is an argument for conditional estimands to increase power \citep{phillippo2021target}, others advocate for marginal estimands \citep{remiro2025marginal,remiro2021conflating}. Recent syntheses and harmonisation suggest that both are valuable depending on the decision question \citep{phillippo2025effect}. Consequently, it is beneficial for analysts to have the ability to compare multiple approaches within a single analysis.
+
+This article introduces \pkg{outstandR}, an \proglang{R} package designed to address these inefficiencies by providing a comprehensive and unified framework for population-adjusted indirect comparison (PAIC). \pkg{outstandR} streamlines the entire workflow—from covariate simulation and model standardization to contrast estimation. Beyond standard weighting (MAIC) approaches, the package implements advanced G-computation and MIM methods within both maximum likelihood and Bayesian frameworks.
+
 
 % outline
-The remainder of this paper is organized as follows. Section~\ref{sec:methodology} establishes the methodological framework, defining the general problem of indirect treatment comparisons and detailing the statistical mechanics of population adjustment methods, including MAIC, STC, and advanced G-computation approaches. Section~\ref{sec:implementation} describes the software architecture of \pkg{outstandR}, illustrating how the package leverages an S3 object-oriented design to separate statistical strategies from computational execution and streamline the workflow. Section~\ref{sec:examples} provides a practical demonstration of the package, guiding the user through illustrative examples using synthetic datasets for both binary and continuous outcomes. Finally, Section~\ref{sec:conclusion} concludes with a discussion of the package's capabilities and potential areas for future development.
+The remainder of this paper is organized as follows. Section~\ref{sec:methodology} establishes the methodological framework, defining the general problem of indirect treatment comparisons and detailing the statistical mechanics of population adjustment methods, including MAIC, STC, and advanced G-computation approaches. Section~\ref{sec:implementation} describes the software architecture of \pkg{outstandR}, illustrating how the package leverages an S3 object-oriented design to separate statistical strategies from computational execution and streamline the workflow. Section~\ref{sec:examples} provides a practical demonstration of the package, guiding the user through illustrative examples using synthetic datasets for binary and continuous outcomes. Finally, Section~\ref{sec:conclusion} concludes with a discussion of the package's capabilities and potential areas for future development.
 
 \section{Population-Adjusted Indirect Comparison (PAIC)}
 \label{sec:methodology}
-Consider a scenario with two trials: an $AC$ trial with individual patient data (IPD) comparing treatments $A$ and $C$, and a $BC$ trial with only published aggregate-level data (ALD) comparing treatments $B$ and $C$. The objective is to estimate a comparison of the effects of treatments $A$ and $B$ on a suitable scale in some target population $P$, denoted by the parameter $d_{AB(P)}$ \citep{RemiroAzocar2022a}. We will focus on population adjustment methods to make ``anchored'' indirect comparisons, where the evidence is connected by a common comparator, in our case $C$, and ``unanchored'' indirect comparisons, where the evidence is disconnected due to the lack of a common comparator or single-arm studies.
+Consider a scenario with two trials: an $AC$ trial with individual patient data (IPD) comparing treatments $A$ and $C$, and a $BC$ trial with only published aggregate-level data (ALD) comparing treatments $B$ and $C$. The objective is to estimate a comparison of the effects of treatments $A$ and $B$ on a suitable scale in some target population $P$, denoted by the estimand $d_{AB(P)}$ \citep{RemiroAzocar2022a}. We will focus on population adjustment methods to make ``anchored'' indirect comparisons, where the evidence is connected by a common comparator, in our case $C$.
 
 \subsection{General problem formulation}
 \label{ssec:problem_formulation}
 
-Let $\mu_{A(AC)}$ and $\mu_{C(AC)}$ represent the expected outcomes for treatments $A$ and $C$ within the $AC$ trial population. We also have estimators $\bar{Y}_{A(AC)}$ and $\bar{Y}_{C(AC)}$ of the expected outcomes. There is also an equivalent set of parameters for the $B$ trial. 
+Let $\mu_{A(AC)}$ and $\mu_{C(AC)}$ represent the expected outcomes for treatments $A$ and $C$ within the $AC$ trial population. We also have estimates $\hat{\mu}_{A(AC)}$ and $\hat{\mu}_{C(AC)}$ of the expected outcomes, with an equivalent set for the $BC$ trial. 
 
-We define estimators $\Delta_{AC(AC)}$ and $\Delta_{BC(BC)}$ of the relative treatment effects at the trial level for a given scale. Assuming a {\it difference} scale (e.g., log-odds ratio, risk difference), the estimate of relative treatment effect between treatments $A$ and $C$
+Define estimators $\hat{\Delta}_{AC(AC)}$ and $\hat{\Delta}_{BC(BC)}$ of the relative treatment effects at the trial level for a given scale. Assuming a {\it difference} scale (e.g., log-odds ratio, risk difference), the estimate of relative treatment effect between treatments $A$ and $C$
+%% [ARA] change order of treaments in RHS?
 \begin{equation}
 \label{eqn:relative_treatment_effect}
-\Delta_{AC(AC)} = g(\bar{Y}_{C{(AC)}}) - g(\bar{Y}_{A{(AC)}}),
+\hat{\Delta}_{AC(AC)} = g(\hat{\mu}_{A{(AC)}}) - g(\hat{\mu}_{C{(AC)}}),
 \end{equation}
-and similarly for $\Delta_{BC(BC)}$. If we assume that there is no difference in effect modifiers between trials, then the estimator of the relative treatment effect $d_{AB(BC)}$ is
+where $g(\cdot)$ is a link function (e.g., identity for linear regression, logit for logistic regression, log for Cox regression hazard ratio). An equivalent equation can be written for $\hat{\Delta}_{BC(BC)}$. If we assume that there is no difference in effect modifiers between trials, then the estimator of the relative treatment effect $d_{AB(BC)}$ is
+%%[ARA] change order of contrasts in the RHS?
 \[
-\Delta_{AB} = \Delta_{BC(BC)} - \Delta_{AC(AC)}.
+\hat{\Delta}_{AB} = \hat{\Delta}_{AC(AC)} - \hat{\Delta}_{BC(BC)}.
 \]
 However, when distributions of the effect modifiers are different between trial populations, the relative treatment effect estimated from each trial cannot simply be combined as above. This is the purpose of population-adjustment in ITC, to enable the comparison of unbiased statistics
+%%[ARA] change order of contrasts in the RHS?
 \begin{equation}
 \label{eqn:paic}
-\Delta_{AB(BC)} = \Delta_{BC(BC)} - \Delta_{AC(BC)}.
+\hat{\Delta}_{AB(BC)} = \hat{\Delta}_{AC(BC)} - \hat{\Delta}_{BC(BC)}.
 \end{equation}
 Section~\ref{sec:paic-methods} will detail the PAIC methods available in \pkg{outstandR}.
 
 % For each treatment $t$, define the following:
 % \begin{itemize}
 %     \item $p_t$: Observed proportion (for binary outcomes).
-%     \item $\bar{y}_t$: Observed mean (for continuous or count outcomes).
+%     \item $\hat{\mu}_t$: Observed mean (for continuous or count outcomes).
 %     \item $s_t$: Observed standard deviation (for continuous outcomes).
 %     \item $N_t$: Number of observations.
 % \end{itemize}
 
 % \subsubsection{Variance of treatment effects}
-% The variance of the treatment effect for each arm is calculated based on the distribution family and the chosen effect scale. Let $\text{Var}(\Delta_t)$ denote the variance contribution from treatment $t$. The variance of the treatment effect for a direct comparison (e.g., $C$ vs $B$) would then be $\text{Var}(\Delta_{C}) + \text{Var}(\Delta_{B})$.
+% The variance of the treatment effect for each arm is calculated based on the distribution family and the chosen effect scale. Let $\text{Var}(\hat{\Delta}_t)$ denote the variance contribution from treatment $t$. The variance of the treatment effect for a direct comparison (e.g., $C$ vs $B$) would then be $\text{Var}(\hat{\Delta}_{C}) + \text{Var}(\hat{\Delta}_{B})$.
 
 
 \subsection{Population adjustment methods}
 \label{sec:paic-methods}
-The \pkg{outstandR} package allows the implementation of a range of methods for adjusting the IPD to the target population, commonly the ALD.
+The \pkg{outstandR} package allows the implementation of a range of methods to adjust the IPD to the target population, commonly the ALD.
 
-We make a clear and necessary distinction between prognostic factors (PF) and effect modifiers (EM). Prognostic factors are covariates that affect the outcome whereas effect modifiers are covariates that alter the effect of treatment as measured on a given scale. Effect modifiers are not necessarily also prognostic variables, and may be specific to each treatment. Note that effect modifier status on one scale does not necessarily imply effect modifier status on another scale. We also assume internal validity of the studies included in the analysis. That is, the studies provide unbiased estimates of treatment effects in their respective sample populations.
+% We distinguish between prognostic factors (PF) and effect modifiers (EM) at the individual level. Conceptually, prognostic factors are covariates that affect the outcome independent of treatment, whereas effect modifiers are covariates that interact with the treatment to alter its conditional effect. However, it is important to note that when evaluating effects on non-collapsible scales (such as odds ratios or hazard ratios), imbalances in strictly prognostic factors will also alter the marginal treatment effect. Effect modifiers are not necessarily prognostic variables, and effect modifier status on one scale does not imply effect modifier status on another. We also assume internal validity of the studies included in the analysis. That is, the studies provide unbiased estimates of treatment effects in their respective sample populations.
 
 \subsubsection{Matching-Adjusted Indirect Comparison (MAIC)}
-Matching-Adjusted Indirect Comparison (MAIC) is based on propensity score weighting, reweights IPD to match aggregate characteristics of the comparator trial \citep{signorovitch2010}. The core idea of MAIC is to re-weight the patients in the IPD $AC$ trial such that their aggregated baseline characteristics match those of the ALD $BC$ trial. This re-weighting process is essentially an optimization problem.
+Matching-Adjusted Indirect Comparison (MAIC) is a method-of-moments weighting approach, to match aggregate characteristics of the comparator trial \citep{signorovitch2010}. The core idea of MAIC is to re-weight the patients in the IPD $AC$ trial such that their aggregated baseline characteristics match those of the ALD $BC$ trial. This re-weighting process is essentially an optimization problem.
 
 Let $X_i$ be the vector of baseline characteristics for the $i$-th patient in the IPD $AC$ trial, for $i = 1, \dots, n_A$, where $n_A$ is the number of patients in $AC$ trial. Let $\bar{X}_B$ be the vector of mean baseline characteristics reported for the ALD $BC$ trial.
 
 The objective is to find a set of weights, $w_i$, for each patient $i$ in the $AC$ trial, such that the weighted average of their baseline characteristics matches the aggregate baseline characteristics of the $BC$ trial. This can be formulated as minimizing a certain objective function, typically related to the sum of weights or the effective sample size, subject to matching constraints.
 
-A common approach involves a logistic regression-based re-weighting. The weights $w_i$ are often derived from a propensity score-like model, where the parameters of this model are optimized. Specifically, the weights are defined as:
+A common approach involves a logistic regression-based re-weighting. The weights $w_i$ are often derived from a propensity score-like model, where the parameters of this model are optimized. Specifically, the weights are defined as follows:
 
 $$ 
 w_i = \exp(\beta^\top X_i),
@@ -149,7 +160,7 @@ where $\beta$ is a vector of coefficients to be estimated. The optimization prob
 $$ 
 \sum_{i=1}^{n_A} w_i X_i = \sum_{i=1}^{n_A} \exp(\beta^\top X_i) X_i = n_A \bar{X}_B.
 $$
-This system of equations can be rewritten by centering the covariates around the target means $\bar{X}_B$:
+This system of equations can be rewritten by centring the covariates around the target means $\bar{X}_B$:
 
 $$ 
 \sum_{i=1}^{n_A} \exp(\beta^\top (X_i - \bar{X}_B)) (X_i - \bar{X}_B) = 0. 
@@ -159,24 +170,29 @@ This is the first derivative with respect to $\beta$ of the following convex obj
 $$
 \min_{\beta \in \mathbb{R}^p} \sum_{i=1}^{n_A} \exp(\beta^\top (X_i - \bar{X}_B)),
 $$
-where $p$ is the number of baseline characteristics being matched. The minimization of this convex function ensures a unique global minimum for $\beta$. Once $\beta$ is found, the weights $w_i$ are calculated, and these weights are then used in a weighted analysis (e.g., weighted logistic regression or Cox regression) of the IPD from the $AC$ trial to estimate the treatment effect in a population that is adjusted to resemble the $BC$ trial.
+where $p$ is the number of baseline characteristics being matched. 
 
-The resulting effect size from the weighted IPD in the $AC$ trial can then be indirectly compared to the treatment effect observed in the $AB$ trial (often compared to its common comparator in an ``anchored'' MAIC, or as a direct comparison in ``unanchored'' MAIC). The optimization process ensures that the populations being compared are as similar as possible based on the available covariates, thereby reducing potential bias due to differences in prognostic factors or effect modifiers.
+An extension for higher-order moments is to also include the variance and the covariances. To balance variances requires the ALD to report the standard deviation, and balancing covariance requires the ALD to report the interaction term.
+% ($\mathbb{E}[X^2] = \text{SD}^2 + \mathbb{E}[X]^2$)
+% ($E[X_1 X_2]$)
 
-\subsubsection{Simulated Treatment Comparison (STC)}
-Simulated Treatment Comparison (STC) relies on outcome regression models fitted to IPD, conditioning on covariates, then applying estimates to ALD \citep{caro2010, ishak2015}. STC involves using the IPD to build a model that predicts patient outcomes based on their baseline characteristics, and then using this model to estimate what the outcomes of the IPD trial's treatment would have been if it were applied to the population of the ALD $BC$ trial.
+The minimization of this convex function ensures a unique global minimum for $\beta$. Once $\beta$ is found, the weights $w_i$ are calculated, and these weights are then used in a weighted analysis (e.g., weighted logistic regression or Cox regression) of the IPD from the $AC$ trial to estimate the treatment effect in a population that is adjusted to resemble the $BC$ trial.
 
-\paragraph{Model Fitting (Optimization Step)}
-Let $Y_i$ be the outcome for patient $i$ in the IPD $AC$ trial, and $X_i$ be the vector of baseline characteristics for patient $i$. An outcome regression model is fitted using the IPD $AC$ trial. This model relates the outcome to the baseline covariates. For a continuous outcome, a linear regression might be used; for a binary outcome, logistic regression; and for time-to-event data, a Cox proportional hazards model or parametric survival model.
-The general form of this outcome model can be expressed as:
+The resulting effect size from the weighted IPD in the $AC$ trial can then be indirectly compared to the treatment effect observed in the $AB$ trial. The optimization process ensures that the populations being compared are as similar as possible based on the available covariates, thereby reducing potential bias due to differences in prognostic factors or effect modifiers.
+ % (often compared to its common comparator in an ``anchored'' MAIC, or as a direct comparison in ``unanchored'' MAIC)
+
+\subsubsection[Simulated Treatment Comparison (STC)]{Simulated Treatment Comparison (STC)\footnote{STC is discouraged from use but included here for completeness.}}
+Simulated Treatment Comparison (STC) relies on outcome regression models fitted to IPD, conditioning on covariates, then applying estimates to ALD \citep{caro2010, ishak2015}. STC involves building an outcome model from the IPD based on baseline characteristics, and subsequently evaluating this model at the mean covariate values of the ALD to approximate the marginal mean outcome.
+
+\paragraph{Model Fitting}
+Let $Y_i$ be the outcome for patient $i$ in the IPD $AC$ trial, and $X_i$ be the vector of baseline characteristics for patient $i$. An outcome regression model is fitted using the IPD $AC$ trial. The general form of this outcome model can be expressed as:
 $$ 
 g(\mathbb{E}[Y_i | X_i]) = \alpha + \beta^\top X_i,
 $$
-where $g(\cdot)$ is a link function (e.g., identity for linear regression, logit for logistic regression, log for Cox regression hazard ratio); $\mathbb{E}[Y_i | X_i]$ is the expected outcome for patient $i$ given their baseline characteristics $X_i$; $\alpha$ is the intercept; $\beta$ is a vector of regression coefficients for the baseline characteristics $X_i$.
-The ``optimization'' in this step refers to the standard process of estimating the model parameters ($\alpha$ and $\beta$) by maximizing the likelihood function (or minimizing a sum of squares, depending on the model).
+where $\mathbb{E}[Y_i | X_i]$ is the expected outcome for patient $i$ given their baseline characteristics $X_i$; $\alpha$ is the intercept; $\beta$ is a vector of regression coefficients for the baseline characteristics $X_i$.
 
-\paragraph{Prediction (Simulation Step)}
-Once the outcome model is fitted using data from the IPD $AC$ trial, the estimated coefficients ($\hat{\alpha}, \hat{\beta}$) are used to predict the expected outcome of treatment $A$ for the population of the $AB$ trial. Since only aggregate data (typically means and standard deviations) are available for the $AB$ trial's population, these aggregate values ($\bar{X}_B$) are substituted into the fitted model to estimate the mean outcome.
+\paragraph{Expectation at Covariate Means}
+Next, ($\hat{\alpha}, \hat{\beta}$) are used to obtain the expected outcome of treatment $A$ for the population of the $BC$ trial. Since only aggregate data (typically means and standard deviations) are available for the $BC$ trial's population, these aggregate values ($\bar{X}_B$) are substituted into the fitted model to estimate the mean outcome.
 
 The predicted mean outcome of treatment $A$ in the population of the $BC$ trial, denoted as $\hat{\mathbb{E}}[Y_A | \text{Pop}_B]$, is calculated as:
 $$
@@ -185,87 +201,48 @@ $$
 where $g^{-1}(\cdot)$ is the inverse of the link function.
 
 \paragraph{Limitations and modifications}
-A significant limitation of standard STC arises when the link function $g(\cdot)$ is non-linear (e.g., logit or log link). In such cases, simply substituting the mean covariate values ($\bar{X}_B$) into the fitted model can lead to biased estimates of the marginal treatment effect in the target population (known as ``aggregation bias'' or ``non-collapsibility'').
+A significant limitation of standard STC arises when the link function $g(\cdot)$ is non-linear (e.g., logit or log link). In such cases, simply substituting the mean covariate values into the fitted model can lead to biased estimates. This occurs due to two distinct issues: \emph{aggregation bias}, which arises when evaluating non-linear models at aggregate covariate means rather than averaging individual-level predictions, and \emph{non-collapsibility}, an inherent property of certain effect measures (like odds ratios) where marginal and conditional effects naturally differ.
 
 To address this, more advanced STC-type methods, particularly those incorporating actual simulation, are being developed. These methods aim to correctly estimate the marginal outcome in the target population, often by simulating individual patient profiles for the ALD trial's population based on their reported aggregate statistics and assumed covariate distributions. This approach is truly simulation-based and involves drawing from estimated joint covariate distributions and leads into the following methods based on G-computation.
 
-\subsubsection{Parametric G-computation with Maximum Likelihood}
-G-computation, also known as the G-formula, fits an outcome model to IPD using maximum likelihood, then predicts outcomes in the comparator population \citep{RemiroAzocar2022a}. It is a method for estimating causal effects by standardizing outcomes across different treatment regimens. The conditional expectation of the outcome given treatment and covariates are modelled directly. When implemented using Maximum Likelihood Estimation (MLE), the process involves fitting a series of regression models for the outcome and, potentially, for time-varying confounders, and then using these models to predict outcomes under hypothetical treatment scenarios.
+Due to these severe limitations, the standard STC method has been formally deprecated in \pkg{outstandR} in favour of the more robust G-computation approaches.
 
-The fundamental idea of G-computation is to emulate a randomized trial by predicting outcomes under different treatment assignments for each individual in the observed (or a representative) population, and then averaging these predicted outcomes.
-The target parameter for G-computation is often the marginal mean outcome under a specific treatment regimen $A^*$, defined as:
+\subsubsection{Parametric G-computation with Maximum Likelihood}
+G-computation, also known as the G-formula, fits an outcome model to IPD using maximum likelihood, then predicts outcomes in the comparator population~\citep{RemiroAzocar2022a}. It is a method for estimating causal effects by standardizing outcomes across different treatment regimens. The conditional expectation of the outcome given treatment and covariates are modelled directly. When implemented using Maximum Likelihood Estimation (MLE), the process involves fitting a regression model for the outcome, and then using this to predict outcomes.
+
+We consider a particular version of G-computation for ITC in \pkg{outstandR}.
+The fundamental idea of G-computation is to predict outcomes under different treatments for each individual in a population, and then averaging these predicted outcomes. The target parameter for G-computation will be the marginal mean outcome under a given treatment regimen $A^*$, defined as
 $$
 \mathbb{E}[Y^{A^*}] = \sum_{x} \mathbb{E}[Y | A^*=a, X=x] P(X=x).
 $$
 For continuous covariates, the sum becomes an integral. In essence, it calculates the average outcome if all members of the population followed the treatment regimen $A^*$.
 
-\paragraph{Maximum Likelihood Implementation Steps}
-The MLE implementation of G-computation typically involves the following steps:
-
-First, specify and fit models for outcome and confounders. This is the ``optimization'' step where parameters are estimated using MLE. A set of regression models are specified for the outcome and any time-varying confounders.
-
-\begin{enumerate}
-    \item Outcome Model: A model for the outcome $Y$ given the treatment $A$ (or sequence of treatments $A_t$) and relevant covariates $L$ (baseline and/or time-varying confounders).
-    $$
-    \mathbb{E}[Y | A, L] = h(\theta_Y^\top Z_Y),
-    $$
-    where $h(\cdot)$ is the inverse of the link function, $Z_Y$ is a vector of covariates and treatment terms, and $\theta_Y$ are the parameters to be estimated. For example, for a continuous outcome $Y$:
-    $$
-    Y \sim N(\beta_0 + \beta_A A + \beta_L L + \dots, \sigma^2).
-    $$
-    The parameters $(\beta_0, \beta_A, \beta_L, \dots, \sigma^2)$ are estimated by maximizing the likelihood of the observed data.
-    \item Confounder Models (for time-varying confounders): If there are time-varying confounders $L_t$ that are themselves affected by prior treatment and affect future outcomes, separate models are fitted for each $L_t$ given prior covariates and treatment history.
-    $$
-    \mathbb{E}[L_t | A_{0 \dots t-1}, L_{0 \dots t-1}] = f(\theta_{L_t}^\top Z_{L_t}),
-    $$
-    where $f(\cdot)$ is a link function, $Z_{L_t}$ includes relevant past treatment and covariate history, and $\theta_{L_t}$ are the parameters estimated by maximizing the likelihood for each confounder model.
-\end{enumerate}
-The estimation of these parameters ($\theta_Y, \theta_{L_t}$) constitutes the maximum likelihood optimization. For each model, we seek the parameters that maximize the likelihood function $\mathcal{L}(\theta | \text{Data})$, or equivalently, minimize the negative log-likelihood.
-
-\paragraph{Simulation/Prediction Step}
-Once all necessary models are fitted, the estimated parameters are used to predict outcomes under a hypothesized treatment. This can be done via:
-
-\begin{enumerate}
-    \item Monte Carlo Simulation (typically for complex scenarios):
-     For each individual in the original dataset (or a large simulated population representative of it):
-     Set their treatment to the hypothesized regimen $A^*$. Use the fitted confounder models to simulate trajectories of time-varying confounders under this regimen. Use the fitted outcome model to predict the outcome for each individual under the simulated covariate and treatment path. Average the predicted outcomes across all individuals to obtain the marginal mean outcome for the treatment $A^*$.
-
-    \item Direct Standardization (for simpler cases without time-varying confounding):
-     For each observed individual $i$, predict their outcome under the hypothesized treatment $A^*$:
-     $$
-     \hat{Y}_i(A^*) = h(\hat{\theta}_Y^\top Z_Y(A^*, L_i)),
-     $$
-     where $Z_Y(A^*, L_i)$ incorporates the hypothesized treatment $A^*$ for individual $i$ with their observed covariates $L_i$.
-     The estimated marginal mean outcome is then the average of these predictions:
-     $$
-     \hat{\mathbb{E}}[Y^{A^*}] = \frac{1}{N} \sum_{i=1}^N \hat{Y}_i(A^*).
-     $$
-\end{enumerate}
+First, we specify and fit models for outcome and confounders using MLE. Then, the estimated parameters are used to predict outcomes under an alternative population. This is done using a synthetic cohort of the $BC$ ALD trial population and the fitted outcome model to predict the outcome for each individual with IPD trial treatments. We then average the predicted outcomes across all individuals to obtain the marginal mean outcome for the treatment $A^*$.
 
 %%TODO can this be shortened?
 \paragraph{Synthetic cohort generation}
-Generally, there are several different approaches to generating a synthetic cohort. We will detail how to create one which accurately reflects the target population's covariate structure by employing a {\it Gaussian copula}. This allows us to decouple the dependence structure (correlation) from the marginal distributions of the individual covariates.
+Generally, there are several different approaches to generating a synthetic cohort. We will detail how to create one that accurately reflects the target population's covariate structure by employing a {\it Gaussian copula}. This allows us to decouple the dependence structure (correlation) from the marginal distributions of the individual covariates.
 
-Let $K$ be the number of covariates and $\boldsymbol{\Sigma}$ be the $K \times K$ correlation matrix, typically estimated from the IPD. We wish to simulate $N$ individuals for the pseudo-population.
+Let $K$ be the number of covariates and $\boldsymbol{\Sigma}$ be the $K \times K$ correlation matrix, typically estimated from IPD. We wish to simulate $N$ individuals for the pseudo-population.
 
 The simulation proceeds in three steps:
 
 \begin{enumerate}
     \item \textbf{Generate Latent Multivariate Normal Data:}
-    We first draw $N$ samples from a multivariate normal distribution with mean vector $\mathbf{0}$ and correlation matrix $\boldsymbol{\Sigma}$:
+    We first draw $N$ samples from a multivariate normal distribution with mean vector $\mathbf{0}$ and correlation matrix $\boldsymbol{\Sigma}$
     \begin{equation*}
         \mathbf{Z}_i \sim MVN_K(\mathbf{0}, \boldsymbol{\Sigma}), \quad \text{for } i = 1, \dots, N.
     \end{equation*}
 
     \item \textbf{Probability Integral Transform:}
-    We transform these correlated normal variates into uniform variates $\mathbf{U}_i = (U_{i1}, \dots, U_{iK})$ using the cumulative distribution function (CDF) of the standard normal distribution, $\Phi(\cdot)$:
+    We transform these correlated normal variates into uniform variates $\mathbf{U}_i = (U_{i1}, \dots, U_{iK})$ using the cumulative distribution function (CDF) of the standard normal distribution, $\Phi(\cdot)$
     \begin{equation*}
         U_{ik} = \Phi(Z_{ik}),
     \end{equation*}
     where $U_{ik} \sim \text{Uniform}(0, 1)$ and the correlation structure of $\mathbf{Z}$ is preserved.
 
     \item \textbf{Inverse Probability Transform (Marginals):}
-    Finally, we map the uniform variates to the target scales using the inverse CDFs (quantile functions) of the marginal distributions. Let $F_k(\cdot; \theta_k)$ denote the CDF for the $k$-th covariate with parameters $\theta_k$:
+    Finally, we map the uniform variates to the target scales using the inverse CDFs (quantile functions) of the marginal distributions. Let $F_k(\cdot; \theta_k)$ denote the CDF for the $k$-th covariate with parameters $\theta_k$
     \begin{equation}
         \label{eqn:marginal-transformation}
         X_{ik} = F_k^{-1}(U_{ik}; \theta_k).
@@ -274,129 +251,97 @@ The simulation proceeds in three steps:
 
 This procedure ensures that the resulting synthetic covariates $\mathbf{X}$ possess the desired marginal properties defined by $F_k$ while maintaining the correlation structure $\boldsymbol{\Sigma}$.
 
-\subsubsection{Parametric G-computation with Bayesian Inference}
-G-computation (G-formula) can also be implemented using Bayesian inference. This is similar to the maximum likelihood version, but within a Bayesian framework allows for coherent propagation of uncertainty \citep{RemiroAzocar2022a}.
-This offers several advantages over the frequentist MLE approach, particularly in quantifying uncertainty and incorporating prior knowledge. Instead of finding point estimates for model parameters that maximize a likelihood function, the Bayesian approach involves estimating the full posterior distribution of these parameters. This allows for direct probability statements about the parameters and the resulting causal effects.
+% limitations
+A limitation of using the copula approach is that, at the moment, covariate simulation is flawed whenever non-continuous covariates are included.
 
-As before, we wish to estimate the marginal mean outcome under a specific treatment regimen $A^*$, defined as $\mathbb{E}[Y^{A^*}]$. The core idea is to average predicted outcomes under counterfactual treatment scenarios.
-The Bayesian implementation of G-computation typically follows these steps:
+\paragraph{Causal Effect Estimation}
+Once the marginal mean outcomes are estimated for the respective treatment regimens (e.g., $\hat{\mathbb{E}}[Y^{A_1^*}]$ and $\hat{\mathbb{E}}[Y^{A_0^*}]$) using the synthetic cohort, the relative causal effect is calculated. Depending on the desired scale, this is computed as the difference or ratio of the marginal means. For instance, the marginal mean difference is simply $\hat{\Delta} = \hat{\mathbb{E}}[Y^{A_1^*}] - \hat{\mathbb{E}}[Y^{A_0^*}]$.
+
+\subsubsection{Parametric G-computation with Bayesian Inference}
+G-computation can also be implemented using Bayesian inference. This is similar to the maximum likelihood version but offers several advantages over the frequentist MLE approach, particularly in quantifying and coherently propagating uncertainty \citep{RemiroAzocar2022a}, and incorporating prior knowledge. Instead of estimating point estimates for model parameters that maximize a likelihood function, the Bayesian approach estimates the full posterior distribution of these parameters. This allows for direct probability statements about the parameters and the resulting causal effects.
+
+As for the MLE approach, we wish to estimate the marginal mean outcome under a specific treatment regimen $A^*$, defined as $\mathbb{E}[Y^{A^*}]$. The core idea is to average predicted outcomes under counterfactual treatment scenarios. The Bayesian implementation of G-computation typically follows these steps:
 
 \paragraph{Step 1: Specify and Fit Models with Bayesian Inference}
 
 \begin{enumerate}
-    \item Model Specification: Define the same types of regression models as in the frequentist approach for the outcome
-        $$
-        Y_i \sim g^{-1}(\alpha + \beta^\top X_i),
-        $$
-        where $g^{-1}(\cdot)$ is the inverse of the link function, $X_i$ includes treatment and covariate terms, and $\alpha, \beta$ are the parameters.
+    \item Model Specification: Define the same types of regression models as in the frequentist approach for the outcome.
 
     \item Prior Specification: Assign prior distributions to all model parameters (e.g., $\alpha, \beta, \gamma$, and any dispersion parameters like $\sigma^2$). These priors reflect existing knowledge or assumptions about the parameters before observing the data. For example:
     $$ \alpha \sim N(0, \sigma_{\alpha}^2) $$
     $$ \beta_k \sim N(0, \sigma_{\beta}^2) \quad \forall k $$
     $$ \sigma^2 \sim \text{Inv-Gamma}(a, b). $$
 
-    \item Posterior Sampling (Optimization/Inference):
+    \item Posterior Sampling:
     Using computational methods like Markov Chain Monte Carlo (MCMC) (e.g., Gibbs sampling, Metropolis-Hastings, Hamiltonian Monte Carlo), samples are drawn from the joint posterior distribution of all model parameters. The result is a set of $M$ posterior samples for each parameter, e.g., $(\alpha^{(m)}, \beta^{(m)}, \gamma^{(m)})$, for $m=1, \dots, M$.
 \end{enumerate}
 
 \paragraph{Step 2: Prediction/Simulation Step (Posterior Predictive Simulation)}
-For each set of sampled parameters from the posterior distribution ($m=1, \dots, M$):
+First, generate a synthetic target cohort (of size $N$) that reflects the target ALD population, using the exact same Gaussian copula approach described for the Maximum Likelihood implementation. Then, for each set of sampled parameters from the posterior distribution $(m=1, ..., M)$:
 \begin{enumerate}
-    \item Generate counterfactual data:
-    For each individual $i$ in the observed population (or a large simulated population representative of it), set their treatment to the hypothesized regimen $A^*$.
-    Using the $m$-th sample of parameters for the confounder models ($\gamma^{(m)}$), simulate trajectories of time-varying confounders under this regimen. This involves drawing from the conditional predictive distributions of $L_t$ for each individual, sequentially.
-    Using the $m$-th sample of parameters for the outcome model ($\alpha^{(m)}, \beta^{(m)}$), predict the outcome for each individual under the simulated covariate and treatment path. This also involves drawing from the conditional predictive distribution of $Y$.
-
-    \item Calculate marginal mean for this sample:
-    Average the predicted outcomes across all individuals to obtain the marginal mean outcome for the regimen $A^*$ for this $m$-th posterior sample:
-    $$
-    \hat{\mathbb{E}}[Y^{A^*}]^{(m)} = \frac{1}{N} \sum_{i=1}^N \hat{Y}_i(A^*)^{(m)}.
-    $$
+    \item Predict Counterfactual Outcomes: For each individual $i$ in the synthetic cohort, set their treatment to the hypothesized regimen $A^*$. Using the $m$-th sample of parameters for the outcome model $(\alpha^{(m)}, \beta^{(m)})$, predict the outcome for each individual based on their simulated baseline covariates. This involves drawing from the conditional predictive distribution of $Y$.
+    \item Calculate marginal mean for this sample: Average the predicted outcomes across all $N$ individuals in the synthetic cohort to obtain the marginal mean outcome for the regimen $A^*$ for this $m$-th posterior sample:$\hat{\mathbb{E}}[Y^{A^*}]^{(m)} = \frac{1}{N} \sum_{i=1}^N \hat{Y}_i(A^*)^{(m)}$
 \end{enumerate}
-This results in $M$ samples of the marginal mean outcome $\hat{\mathbb{E}}[Y^{A^*}]^{(m)}$, which together form the posterior distribution of the marginal mean outcome under treatment $A^*$.
+
+This results in $M$ samples of the marginal mean outcome, which together form the posterior distribution of the marginal mean under treatment $A^*$.
 
 \paragraph{Step 3: Causal Effect Estimation}
 To estimate the causal effect of two different regimens, $A_1^*$ and $A_0^*$, the above process is repeated to obtain $M$ posterior samples for each: $\hat{\mathbb{E}}[Y^{A_1^*}]^{(m)}$ and $\hat{\mathbb{E}}[Y^{A_0^*}]^{(m)}$.
-The posterior distribution of the causal effect is then directly obtained by computing the difference or ratio for each posterior sample:
+The posterior distribution of the causal effect is then directly obtained by computing the difference for each posterior sample
 $$
-\Delta^{(m)} = \hat{\mathbb{E}}[Y^{A_1^*}]^{(m)} - \hat{\mathbb{E}}[Y^{A_0^*}]^{(m)} \quad \text{ (for differences)}
+\hat{\Delta}^{(m)} = \hat{\mathbb{E}}[Y^{A_1^*}]^{(m)} - \hat{\mathbb{E}}[Y^{A_0^*}]^{(m)}
 $$
-$$
-\Delta^{(m)} = \frac{\hat{\mathbb{E}}[Y^{A_1^*}]^{(m)}}{\hat{\mathbb{E}}[Y^{A_0^*}]^{(m)}} \quad \text{ (for ratios)}
-$$
-From this posterior distribution of the causal effect, one can derive point estimates, credible intervals, and posterior probabilities. A key advantages of Bayesian G-computation are that it provides full uncertainty quantification. The posterior distributions for all parameters and causal effects allows for more comprehensive uncertainty assessment. Incorporation of prior knowledge by allowing for the inclusion of expert knowledge or evidence from previous studies through informative prior distributions. Handling complex models since MCMC methods are well-suited for fitting complex hierarchical or non-linear models often encountered in causal inference. Direct probabilistic statements like ``there is a 95\% probability that the causal effect is between X and Y.''
+From this posterior distribution of the causal effect, one can derive point estimates, credible intervals, and posterior probabilities.
 
+A key advantage of Bayesian G-computation is that it provides a cohesive framework for full uncertainty quantification. Specific benefits include:
+\begin{itemize}
+    \item Comprehensive uncertainty assessment: The posterior distributions for all parameters and causal effects natively propagate error throughout the entire estimation process.
+    \item Incorporation of prior knowledge: The framework allows for the inclusion of expert knowledge or evidence from previous studies through informative prior distributions.
+    \item Handling complex models: MCMC methods are highly flexible and well-suited for fitting the complex hierarchical or non-linear models often encountered in causal inference.
+    \item Direct probabilistic statements: It allows analysts to make intuitive claims, such as "there is a 95\% probability that the true causal effect falls between $X$ and $Y$".
+\end{itemize}
 
-\subsubsection{Multiple Imputation Marginalization method based on parametric G-computation}
-Multiple Imputation Marginalization (MIM) aims to recover a compatible marginal treatment effect by integrating or averaging the conditional estimate over the relevant population, particularly useful for generalized linear models or Cox models \citep{RemiroAzocar2022b}.
-This is a robust method for estimating marginal causal effects, particularly within the framework of parametric G-computation, while simultaneously addressing missing data in the covariates or outcome. 
-Developed by Remiro-Azócar et al., MIM leverages the strengths of multiple imputation \citep{rubin1987} to handle missingness and propagate uncertainty, combined with the power of G-computation to standardize effects across a target population. It is especially useful for estimating marginal effects (e.g., marginal odds ratios) from conditional models, which is crucial for non-collapsible effect measures.
+%
+\subsubsection{Multiple Imputation Marginalization (MIM)}
+Multiple Imputation Marginalization (MIM) is an alternative framework for performing G-computation to recover a compatible marginal treatment effect. Rather than viewing standardisation purely as a prediction exercise, MIM conceptualizes the unobserved potential outcomes of the target population as a missing data problem. By leveraging the principles of multiple imputation, it provides a rigorous mechanism for standardising effects and propagating uncertainty, which is particularly useful for non-collapsible effect measures derived from generalized linear models.
 
-The method integrates two main stages: (1) generation of synthetic datasets (incorporating missing data imputation and counterfactual treatment assignment), and (2) analysis of these synthetic datasets. While it can be implemented with frequentist methods, it naturally accommodates a Bayesian statistical framework, which facilitates principled uncertainty propagation.
-
-\paragraph{Stage 1: Synthetic Data Generation (Imputation and Counterfactual Assignment)}
-This stage creates multiple ``complete'' synthetic datasets that represent counterfactual scenarios and account for missing data. It typically involves a Bayesian approach for imputation and predictive modelling.
+In \pkg{outstandR}, MIM is implemented exclusively within a Bayesian statistical framework to seamlessly connect model fitting with the imputation of the target population's counterfactuals.
 
 \begin{enumerate}
-    \item Missing Data Imputation Model: Fit a multiple imputation model to the observed (potentially incomplete) dataset. This model imputes missing values for $Y$, $A$, and $L$ (or relevant subsets) based on their observed relationships. In a Bayesian context, this involves sampling from the posterior predictive distribution of the missing data given the observed data and specified imputation models.
-    Let $D_{obs}$ be the observed data with potentially missing values. We generate $M$ imputed datasets: $D^{(m)}_{\text{complete}}$, for $m=1, \dots, M$.
+\item Model Fitting and Covariate Simulation
+\begin{itemize}
+    \item \emph{Outcome Regression Model:} First, fit a parametric outcome regression model to the observed individual patient data (IPD) from the AC trial. Using Bayesian inference (via MCMC), we obtain the joint posterior distribution of the model parameters, which characterizes the conditional relationship between the outcome $Y$, treatment $A$, and covariates $L$.
+    \item \emph{Synthetic Cohort Generation:} Next, simulate a synthetic cohort of size $N$ that reflects the covariate distribution of the target aggregate-level data (ALD) from the BC trial. This relies on the covariate simulation step (e.g., the Gaussian copula approach) described previously.
+\end{itemize}
 
-    \item Outcome Regression Model (Fitted on Imputed Data): For each of the $M$ imputed datasets, fit a parametric outcome regression model relating the outcome $Y$ to treatment $A$ and covariates $L$.
-    For a binary outcome, this might be a logistic regression:
-    $$
-    P(Y=1 | A=a, L=l; \theta^{(m)}) = g^{-1}(\alpha^{(m)} + \beta_A^{(m)} a + (\beta_L^{(m)})^\top l), 
-    $$
-    where $g^{-1}(\cdot)$ is the inverse of the link function (e.g., logit inverse). The parameters $(\alpha^{(m)}, \beta_A^{(m)}, \beta_L^{(m)})$ are estimated for each imputed dataset $m$. In a Bayesian setting, these parameters themselves would be drawn from their posterior distribution conditional on $D^{(m)}_{\text{complete}}$.
+\item Imputation of Potential Outcomes
+Instead of predicting a single expected value, we ``impute'' the missing counterfactual outcomes for the synthetic target cohort. For $m=1, ..., M$ draws from the posterior distribution of the outcome model parameters (denoted as $\theta^{(m)}$):
+\begin{itemize}
+    \item \emph{Counterfactual Prediction:} For each individual $i$ in the synthetic BC cohort, use $\theta^{(m)}$ to impute their probability of the outcome under both treatments $A=1$ and $A=0$. For a binary outcome, this is calculated as
 
-    \item Counterfactual Data Creation: For each of the $M$ imputed datasets, and for each individual $i$ within that dataset, create two (or more, for multiple regimens) counterfactual copies:
-    \begin{itemize}
-        \item Set $A=1$: $D_i^{(m, A=1)} = (Y_i^{(m)}, A=1, L_i^{(m)})$
-        \item Set $A=0$: $D_i^{(m, A=0)} = (Y_i^{(m)}, A=0, L_i^{(m)})$
-    \end{itemize}
+$$
+\hat{P}(Y=1|A=1,L_i;\theta^{(m)}) = g^{-1}(\alpha^{(m)} + \beta_A^{(m)}\cdot 1 + (\beta_L^{(m)})^\top L_i)
+$$
 
-    \item Prediction of Counterfactual Outcomes: Using the fitted outcome model from step 2 (with parameters $\theta^{(m)}$) and the counterfactual assignments from step 3, predict the outcome for each individual in each counterfactual dataset.
-    For each $m=1, \dots, M$ and for each individual $i$:
-    $$ \hat{P}(Y=1 | A=1, L_i^{(m)}; \theta^{(m)}) = g^{-1}(\alpha^{(m)} + \beta_A^{(m)} \cdot 1 + (\beta_L^{(m)})^\top L_i^{(m)}) $$
-    $$ \hat{P}(Y=1 | A=0, L_i^{(m)}; \theta^{(m)}) = g^{-1}(\alpha^{(m)} + \beta_A^{(m)} \cdot 0 + (\beta_L^{(m)})^\top L_i^{(m)}) $$
-    These predictions are done for each individual within each of the $M$ imputed datasets.
+$$
+\hat{P}(Y=1|A=0,L_i;\theta^{(m)}) = g^{-1}(\alpha^{(m)} + \beta_A^{(m)}\cdot 0 + (\beta_L^{(m)})^\top L_i)
+$$
+\end{itemize}
+
+\item Marginalization and Pooling
+\begin{itemize}
+    \item \emph{Marginalization within Imputations:} For each of the $M$ imputation sets, calculate the marginal expected outcome by averaging the imputed probabilities across all $N$ individuals in the synthetic cohort. 
+    \item \emph{Calculate Effect Measures:} Compute the desired marginal effect measure (e.g., the marginal odds ratio, denoted $Q^{(m)}$) and its associated within-imputation variance ($U^{(m)}$) for each $m$.
+    \item \emph{Pooling Results:} Finally, the $M$ estimates are pooled. However, because MIM simulates the target population outcomes rather than treating baseline covariates as missing, standard Rubin's rules are modified. The pooled point estimate is the average of the imputed estimates:
+   $\overline{Q} = \frac{1}{M}\sum_{m=1}^{M}Q^{(m)}$
+   Crucially, to calculate the total variance for this specific marginalization approach, the within-imputation variance ($\overline{U}$) is *subtracted* from the between-imputation variance ($B$):
+   $\text{Var}(\overline{Q}) = B - \overline{U}$
+   where 
+   $$
+   B = \frac{1}{M-1}\sum_{m=1}^{M}(Q^{(m)} - \overline{Q})^2 \quad \text{and} \quad \overline{U} = \frac{1}{M}\sum_{m=1}^{M}U^{(m)}.
+   $$
+\end{itemize}
 \end{enumerate}
-
-\paragraph{Stage 2: Analysis of Synthetic Datasets and Pooling}
-
-\begin{enumerate}
-    \item Marginalization within each Imputed Dataset: For each of the $M$ sets of predictions obtained in Stage 1, calculate the marginal expected outcome by averaging the predicted probabilities across all individuals in that imputed dataset.
-    For each $m=1, \dots, M$:
-    $$
-    \hat{\mathbb{E}}[Y^{A=1}]^{(m)} = \frac{1}{N} \sum_{i=1}^N \hat{P}(Y=1 | A=1, L_i^{(m)}; \theta^{(m)})
-    $$
-    $$
-    \hat{\mathbb{E}}[Y^{A=0}]^{(m)} = \frac{1}{N} \sum_{i=1}^N \hat{P}(Y=1 | A=0, L_i^{(m)}; \theta^{(m)}).
-    $$
-
-    \item Calculate Effect Measures within each Imputed Dataset: From these marginal means, compute the desired effect measure for each $m$. For example, for a marginal odds ratio:
-    $$
-    \widehat{\text{OR}}^{(m)} = \frac{\hat{\mathbb{E}}[Y^{A=1}]^{(m)} / (1 - \hat{\mathbb{E}}[Y^{A=1}]^{(m)})}{\hat{\mathbb{E}}[Y^{A=0}]^{(m)} / (1 - \hat{\mathbb{E}}[Y^{A=0}]^{(m)})}.
-    $$
-
-    \item Pooling Results (Rubin's Rules): The $M$ estimates of the marginal effect measure (e.g., $\widehat{\text{OR}}^{(m)}$) are then combined using Rubin's rules for multiple imputation \citep{rubin1987}. This combines the within-imputation variability with the between-imputation variability to provide a single point estimate and a valid measure of total uncertainty (e.g., standard error or credible interval).
-
-    Let $Q$ be the parameter of interest (e.g., $\widehat{\text{OR}}$).
-    The pooled point estimate and total variance are
-    \begin{equation}
-    \label{eqn:rubins-rules}
-    \bar{Q} = \frac{1}{M} \sum_{m=1}^M Q^{(m)} \quad \text{and} \quad
-    \text{Var}(\bar{Q}) = \bar{U} + (1 + \frac{1}{M}) B, 
-    \end{equation}
-    where $\bar{U} = \frac{1}{M} \sum_{m=1}^M U^{(m)}$ is the within-imputation variance (average of squared standard errors from each imputed analysis), and $B = \frac{1}{M-1} \sum_{m=1}^M (Q^{(m)} - \bar{Q})^2$ is the between-imputation variance.
-\end{enumerate}
-
-The ``optimization'' in MIM occurs at two levels:
-\begin{enumerate}
-    \item Imputation Model Fitting: The process of generating multiple imputed datasets involves fitting models (often using MCMC in a Bayesian framework, or chained equations) to estimate the missing data conditional on observed data. This is an optimization to characterize the missing data distribution.
-    \item Outcome Model Fitting: For each imputed dataset, the parametric outcome regression model parameters are estimated (e.g., via MLE in a frequentist approach, or MCMC in a Bayesian approach). This is the second layer of optimization, finding the best-fitting parameters for the conditional outcome.
-\end{enumerate}
-The subsequent steps of prediction, marginalization, and pooling are analytical or simulation-based, not further ``optimization'' in the sense of parameter estimation.
-Advantages of MIM are that it provides a principled way to incorporate uncertainty due to missing data into the causal effect estimation. MIM also correctly estimates marginal causal effects, overcoming the non-collapsibility issue. It allows for full propagation of uncertainty from missing data, model parameter estimation, and the marginalization process. Finally, it can accommodate various types of outcomes and complex covariate structures.
 
 \subsection{Variance estimation and inference}
 
@@ -409,13 +354,13 @@ By default, the package employs computational methods to estimate uncertainty, r
 \begin{itemize}
     \item \textbf{Non-parametric Bootstrapping:} For frequentist strategies such as MAIC and G-computation (ML), standard errors and confidence intervals are derived via non-parametric bootstrapping \citep{efron1979bootstrap}. The IPD is resampled $R$ times, and the entire estimation procedure is repeated for each resample. The variance of the treatment effect is estimated as the sample variance of the $R$ bootstrap replicates.
     
-    \item \textbf{Bayesian Posterior Inference:} Inference is fully Bayesian. Uncertainty is quantified using the posterior distribution of the marginal treatment effect, which naturally propagates uncertainty from the outcome model parameters and the missing potential outcomes.
+    \item \textbf{Bayesian Posterior Inference (Bayesian G-computation only):} For the Bayesian G-computation strategy, inference is fully Bayesian. Uncertainty is quantified using the posterior distribution of the marginal treatment effect, which naturally propagates uncertainty from the outcome model parameters and the missing potential outcomes.
     
-    \item \textbf{Rubin's Rules:} For MIM, variance is estimated using Rubin's rules, given in Equation~(\ref{eqn:rubins-rules}) \citep{rubin1987}.
+    \item \textbf{Modified Pooling Rules (MIM):} For the Multiple Imputation Marginalization (MIM) strategy, variance is estimated using modified pooling rules. Because MIM simulates the target population outcomes rather than treating baseline covariates as missing, standard Rubin's rules do not apply. Instead, the total variance is calculated by subtracting the within-imputation variance from the between-imputation variance, given in Equation~(\ref{eqn:rubins-rules}) \citep{rubin1987}.
 \end{itemize}
 
 \subsubsection{Robust sandwich estimator} \label{sec:variance_methods}
-As an alternative to computationally intensive resampling, \pkg{outstandR} also implements a robust sandwich variance estimator for the STC, MAIC, and G-computation (ML) strategies. This provides a computationally efficient way to obtain standard errors that are robust to model misspecification (e.g., heteroscedasticity).
+As an alternative to computationally intensive resampling, \pkg{outstandR} also implements a robust sandwich variance estimator for the STC, MAIC, and G-computation (ML) strategies. This provides a computationally efficient way to obtain standard errors that are robust to model misspecification (e.g., heteroscedasticity) when performing weighted analyses.
 
 For a marginal treatment effect estimate $\hat{\Delta}$, which is a function $g(\cdot)$ of the estimated model parameters $\hat{\boldsymbol{\beta}}$, the variance is approximated using the delta method:
 \begin{equation}
@@ -441,6 +386,7 @@ The primary function \texttt{outstandR()} orchestrates the standardisation proce
     \item \texttt{CI}: The desired confidence interval level (between 0 and 1, default 0.95).
     \item \texttt{scale}: The relative treatment effect scale. If \texttt{NULL}, it is automatically determined from the model. Options include ``log-odds'', ``log\_relative\_risk'', ``risk\_difference'', ``mean\_difference'', ``rate\_difference'' depending on data type.
     \item \texttt{var\_method}: Method of variance estimation. Options are ``sample'' (default) and ``sandwich''.
+    \item \texttt{verbose}: Logical (default \texttt{TRUE}). Controls console output and provides proactive warnings for computationally expensive operations (e.g., high \texttt{n\_boot} or large pseudo-populations) to prevent users from assuming the session has hung.
     \item \texttt{seed}: Random number seed (optional).
     \item \texttt{...}: Additional arguments, allowing named arguments to be passed to \texttt{rstanarm::stan\_glm()} via \texttt{strategy\_gcomp\_bayes()}.
 \end{itemize}
@@ -468,12 +414,12 @@ The primary function \texttt{outstandR()} orchestrates the standardisation proce
 \texttt{outcome\_model} & Character & The covariates, treatments and outcome formula. \\
 \texttt{balance\_model} & Character & (MAIC) A covariates formula with empty left hand side. \\
 \texttt{scale} & Character & The scale of the treatment effect (e.g., \texttt{"log\_odds"}, \texttt{"risk\_difference"}). \\
-\texttt{family} & Character & The statistical model family (e.g., \texttt{"binomial"}, \texttt{"gaussian"}). \\
+\texttt{family} & Character & The statistical model family (e.g., \texttt{"binomial"}, \texttt{"gaussian"} or \texttt{"poisson"}). \\
 \texttt{ref\_trt} & Character & Name of the common comparator or anchoring treatment. \\
 \texttt{ipd\_comp} & Character & Name of the IPD study-specific comparator. \\
 \texttt{ald\_comp} & Character & Name of the aggregate level data study comparator. \\
 \texttt{CI} & Numeric & The confidence level used for intervals (e.g., 0.95). \\
-\texttt{var\_method} & Character & Method used for variance estimation (\texttt{"sample"}, \texttt{"sandwich"} or \texttt{"rubin"}). \\
+\texttt{var\_method} & Character & Method used for variance estimation (\texttt{"sample"}, \texttt{"sandwich"} or \texttt{"pool"}). \\
 \texttt{model} & List & Container for method-specific elements. \\
 \hspace{3mm} \texttt{\$method\_name} & Character & From ``MAIC'', ``STC'', ``GCOMP\_BAYES'', ``GCOMP\_ML'', and ``MIM''. \\
 \hspace{3mm} \texttt{\$rho} & Numeric & (G-computation, MIM) Matrix of correlation coefficients. \\
@@ -493,6 +439,8 @@ The primary function \texttt{outstandR()} orchestrates the standardisation proce
 
 The function returns a list of statistics as an \texttt{outstandR} S3 class object. The output elements are shown in Table~\ref{tab:s3_structure}. Results are presented as both contrasts and absolute values. For each of these, the means, variances and confidence intervals are provided. Additional elements include the confidence level, reference treatment name, outcome scale, roles of the different treatments, variance estimation method and type of likelihood model. These can be thought of as the arguments provided to the call. A \texttt{model} list is also included with ITC algorithm-specific elements. These are useful for performing diagnostics and more detailed model interrogation.
 
+While the package console output and Table 1 refer broadly to a CI, users should interpret this as a frequentist confidence interval for MAIC and G-computation (ML), and as a Bayesian credible interval for the Bayesian G-computation and MIM strategies.
+
 \subsubsection{How the outstandR() function works internally}
 The \texttt{outstandR()} function is a high-level wrapper function for carrying out all of the required steps of ITC and population adjustment depending on the chosen method. It is designed to abstract away the task of transporting from the IPD to the ALD population and computing the contrast and absolute statistics of interest. The commonality of code across methods is exploited to simplify the code and adhere to the DRY principle. 
 
@@ -504,23 +452,30 @@ strategy_*(formula, family, trt_var, ...)
 \end{verbatim}
 
 \begin{itemize}
-    \item \texttt{formula}: List containing \texttt{outcome\_model} and / or \texttt{balance\_model} formulae. The former is a linear regression formula object, containing prognostic factors (PF) as main effects and effect modifiers (EM) as interactions with the treatment variable, e.g \texttt{y $\sim$ pf + trt + trt:em}. The latter is a formula with no left hand side, e.g. \texttt{$\sim$ x1 + x2}.
+\item \texttt{formula}: A list explicitly separating the models, containing \texttt{outcome\_model} and/or \texttt{balance\_model} formulae. 
+    \begin{itemize}
+        \item \texttt{outcome\_model}: A regression formula for predicting the outcome, containing prognostic factors (PF) and effect modifiers (EM) (e.g., \texttt{y $\sim$ pf + trt + trt:em}).
+        \item \texttt{balance\_model}: A one-sided formula defining covariates to balance (e.g., \texttt{$\sim$ x1 + x2}).
+    \end{itemize}
+    To streamline the user experience, \pkg{outstandR} features intelligent defaults. If \texttt{balance\_model} is omitted, it defaults to a linear sum of all covariates found in the aggregate-level data. If a traditional single formula is passed (legacy support), the package automatically infers the \texttt{balance\_model} by stripping out the response and treatment variables.
     \item \texttt{family}: A base \proglang{R} \pkg{stats} package `family' object specifying the distribution and link function (e.g., `binomial'). Family objects provide a convenient way to specify the details of the models used by functions such as \texttt{glm()}. See \texttt{stats::family()} for more details.
-    \item \texttt{trt\_var}: Treatment variable name; string e.g. \texttt{trt}. If not provided then heuristics are used to guess from the formula.
+    \item \texttt{trt\_var}: Treatment variable name; string e.g. \texttt{trt}. If not provided then heuristics are used to guess from the \texttt{outcome\_model} formula.
 \end{itemize}
 
 The asterisk indicates a placeholder for the name of the particular approach from those detailed in the Methods in Section~\ref{sec:methodology}. Table~\ref{tab:strategy_options} gives the strategy functions and optional arguments of their signature, represented by the ellipses.
 \begin{table}[htbp]
     \centering
-    \caption{Strategy functions corresponding to each approach and optional arguments available in \pkg{outstandR}}
+    \caption{Strategy functions corresponding to each approach and optional arguments available in \pkg{outstandR}. $^{\dagger}$STC is deprecated as of v1.0.1}
     \label{tab:strategy_options}
     \begin{tabular}{lll}
         \toprule
         \textbf{Method} & \textbf{Strategy Function} & \textbf{Optional Arguments} \\
         \midrule
         Matching-Adjusted Indirect Comparison & \texttt{strategy\_maic()} & \texttt{n\_boot} \\
+                           &                            & \texttt{moments} \\
+                           &                            & \texttt{int} \\
         \addlinespace
-        Simulated Treatment Comparison & \texttt{strategy\_stc()} & \texttt{N} \\
+        Simulated Treatment Comparison$^{\dagger}$ & \texttt{strategy\_stc()} & \texttt{N} \\
         \addlinespace
         G-Computation (ML) & \texttt{strategy\_gcomp\_ml()} & \texttt{rho} \\
                            &                            & \texttt{marginal\_distns} \\
@@ -534,6 +489,8 @@ The asterisk indicates a placeholder for the name of the particular approach fro
                                  &                                & \texttt{N} \\
         \addlinespace
         Multiple Imputation Marginalization & \texttt{strategy\_mim()} & \texttt{rho} \\
+                           &                            & \texttt{marginal\_distns} \\
+                           &                            & \texttt{marginal\_params} \\
             &                        & \texttt{N} \\
         \bottomrule
     \end{tabular}
@@ -546,6 +503,8 @@ The argument definitions are:
     \item \texttt{marginal\_params}: Marginal distributions parameters; list of lists, default \texttt{NA}.
     \item \texttt{n\_boot}: Number of resamples used in non-parametric bootstrap; default 1000.
     \item \texttt{N}: Synthetic population size for G-computation; default 1000.
+    \item \texttt{moments}: Integer specifying the highest moment to balance; default 1. Setting to 2 automatically derives the squared term target using the mean and SD from the ALD.
+    \item \texttt{int}: Logical; default FALSE. If TRUE, expands the design matrix to include two-way interactions to balance covariances.
 \end{itemize}
 The resulting objects from running a strategy-type function each have their own \texttt{print} methods.
 
@@ -554,6 +513,8 @@ The resulting objects from running a strategy-type function each have their own 
 Several \proglang{R} packages share conceptual ground with the methods implemented here, though they typically differ in scope or intended application.
 
 General-purpose tools for marginal effects and standardization exist, but often focus on single-study contexts. For instance, the \pkg{marginaleffects} package \citep{aari_marginaleffects_2024} offers a comprehensive suite for post-estimation quantities but is not explicitly designed for cross-study population adjustment. Similarly, \pkg{stdReg2} focuses on standardizing outcomes within a single dataset \citep{g_sofer_2023_10022204}.
+
+For propensity score weighting and covariate balance assessment, packages such as \pkg{WeightIt} \citep{greifer_weightit_2024} and \pkg{cobalt} \citep{greifer_cobalt_2024} provide powerful, general-purpose infrastructure. \pkg{WeightIt} offers unified interfaces for generating balancing weights for various estimands, including the ability to balance higher-order moments. Also, \pkg{cobalt} provides extensive tools for diagnosing covariate balance before and after adjustment. However, like the marginalization tools, they are primarily built for single-study causal inference rather than the specific transportability challenge of synthesizing individual patient data with aggregate-level data targets.
 
 In the domain of longitudinal data, \pkg{gfoRmula} \citep{sjolander2023gformula} and \pkg{gFormulaMI} \citep{Sterne2023} implement the G-formula to estimate causal effects in the presence of time-varying treatments and confounders. However, these are primarily designed for longitudinal analysis of a single study (the latter incorporating multiple imputation via \pkg{mice}) rather than the synthesis of disparate data sources.
 
@@ -573,10 +534,11 @@ The \pkg{outstandR} package relies on standard S3 method dispatch to route the a
 When \code{outstandR()} is called, it pre-processes the input data and then calls \code{calc_IPD_stats(strategy, analysis_params)}. \proglang{R}'s S3 system inspects the class of the \code{strategy} object and dispatches to the specific implementation:
 
 \begin{itemize}
-  \item \code{calc_IPD_stats.maic()}: Handles propensity score weighting and bootstrap estimation.
+  \item \code{calc_IPD_stats.maic()}: Handles moment-matching weighting and bootstrap estimation.
   \item \code{calc_IPD_stats.stc()}: Manages outcome regression modelling and prediction.
   \item \code{calc_IPD_stats.gcomp_ml()}: Orchestrates the simulation of pseudo-populations and maximum likelihood estimation.
   \item \code{calc_IPD_stats.gcomp_bayes()}: Interfaces with the \proglang{Stan} backend for Bayesian inference.
+  \item \code{calc_IPD_stats.mim()}: Interfaces with the \proglang{Stan} backend for multiple imputation and Bayesian inference.
 \end{itemize}
 
 To adhere to the DRY (Don't Repeat Yourself) principle, we utilized a functional programming pattern with the \code{IPD_stat_factory()} helper. Since many strategies require similar post-processing---such as calculating the Average Treatment Effect (ATE) from arm-specific means and formatting the output list---\code{IPD_stat_factory()} wraps the specific calculation functions. It standardizes the output structure (means, variances, confidence intervals) across all methods, ensuring that the \code{outstandR} return object is consistent and predictable for the user.
@@ -601,8 +563,8 @@ The \pkg{outstandR} package requires two primary inputs: individual patient data
 \subsubsection{Individual patient data (IPD)}
 IPD must be provided in long format, where each row represents a single patient. It must contain the following columns:
 \begin{itemize}
-    \item Outcome (\texttt{y}): A column representing the observed result (e.g., 0/1 for binary, numeric for continuous, or counts).
-    \item Treatment (\texttt{trt}): A character or factor column identifying the treatment arm (e.g., ``A'' or ``C'').
+    \item Outcome: A column representing the observed result (e.g., 0/1 for binary, numeric for continuous, or counts). The name is user-specified but defaults to \texttt{y}.
+    \item Treatment: A character or factor column identifying the treatment arm (e.g., ``A'' or ``C''). The name is user-specified but defaults to \texttt{trt}.
     \item Covariates: Separate columns for each prognostic factor (PF) and effect modifier (EM) used in the adjustment.
 \end{itemize}
 
@@ -724,17 +686,16 @@ The corresponding \proglang{R} formula used by \pkg{outstandR} is independent of
 \end{verbatim}
 That is, the main effects are the prognostic factors (\texttt{PF\_cont\_1} and \texttt{PF\_cont\_2}) and the treatment  \texttt{trt}. The interaction terms are with the treatment defined as effect modifiers (\texttt{EM\_cont\_1} and \texttt{EM\_cont\_2}). 
 
-For the MAIC approach, we define the balancing formula as 
+For the MAIC approach, we define the balancing formula to include the effect modifiers as follows 
 \begin{verbatim}
 > # linear formula for the outcome model
-> bal_form_contX <- as.formula(
-+    "~ PF_cont_1 + PF_cont_2 + EM_cont_1 + EM_cont_2")
+> bal_form_contX <- as.formula("~ EM_cont_1 + EM_cont_2")
 \end{verbatim}
 
 \paragraph{Relative treatment effects}
 Let $p_C$ be the proportion of events in the comparator treatment arm and $p_B$ be the proportion of events in the reference treatment arm. For the logit link with binary data, the mean treatment effect required in Equation~(\ref{eqn:paic}) is the log-odds ratio
 $$
-\Delta_{BC} = \text{logit}(p_B) - \text{logit}(p_C)
+\hat{\Delta}_{BC} = \text{logit}(p_B) - \text{logit}(p_C)
 $$
 with variance
 $$
@@ -748,14 +709,14 @@ A full list including alternative treatment effects and variance components avai
 \paragraph{Running oustandR()}
 Having completed the set-up steps, we are now ready to proceed with performing the indirect treatment comparison with \texttt{outstandR()}. In each of the calls, we will explicitly set the random seed for reproducibility.
 
-First, for an MAIC analysis use \texttt{strategy\_maic()}.
+For the MAIC approach, we define the outcome and balancing formulas explicitly in a list. This explicitly separates the statistical intent of weighting versus regression:
 
 \begin{verbatim}
 > outstandR_maic <-
 +   outstandR(ipd_trial = AC_IPD_binY_contX,
 +             ald_trial = BC_ALD_binY_contX,
 +             strategy = strategy_maic(
-+               formula = list(outcome_model = "y ~ trt",
++               formula = list(outcome_model = formula("y ~ trt"),
 +                              balance_model =  bal_form_contX),
 +               family = binomial(link = "logit")),
 +             seed = 12345)
@@ -795,7 +756,7 @@ Absolute:
 \end{verbatim}
 
 This contains the same information as the raw output but in a more presentable format. The first block of text provides modelling details, and the following tibbles show the contrast and absolute effects, respectively.
-The STC, G-computation and MIM analyses are performed similarly but with the \texttt{outcome_model} specified instead of the \texttt{balance_model}.
+The STC, G-computation and MIM analyses are performed similarly but with the \texttt{outcome\_model} specified instead of the \texttt{balance\_model}.
 % \begin{verbatim}
 % > outstandR_stc <-
 % +   outstandR(ipd_trial = AC_IPD_binY_contX,
@@ -827,7 +788,7 @@ The STC, G-computation and MIM analyses are performed similarly but with the \te
 % +               formula = list(outcome_model = lin_form_contX),
 % +               family = binomial(link = "logit")))
 % \end{verbatim}
-Forest plots of the results across all adjustment strategies for the binary outcome is given in Figure~\ref{fig:summary-forest-plot} and generated by calling the following. 
+Forest plots of the results across all adjustment strategies for the binary outcome are given in Figure~\ref{fig:summary-forest-plot} and generated by calling the following. 
 
 \begin{verbatim}
 > plot(outstandR_maic, outstandR_stc, outstandR_gcomp_ml, 
@@ -894,15 +855,15 @@ This corresponds to the \proglang{R} formula given by
 > lin_form_mixedX <- as.formula("y ~ X1 + X2 + X3 + trt + trt:(X1 + X2 + X4)")
 \end{verbatim}
 
-The balance formula is given by
+The balance formula includes the effect modifiers and is given by
 \begin{verbatim}
-> bal_form_mixedX <- as.formula("~ X1 + X2 + X3 + X4")
+> bal_form_mixedX <- as.formula("~ X1 + X2 + X4")
 \end{verbatim}
 
 \paragraph{Relative treatment effect}
-Let $\bar{y}_B$ be the mean in the comparator arm and $\bar{y}_C$ be the mean in the reference arm. Then the mean treatment difference required in Equation~(\ref{eqn:paic}) is simply
+Let $\hat{\mu}_B$ be the mean in the comparator arm and $\hat{\mu}_C$ be the mean in the reference arm. Then the mean treatment difference required in Equation~(\ref{eqn:paic}) is simply
 $$
-\Delta_{BC} = \bar{y}_B - \bar{y}_C.
+\hat{\Delta}_{BC} = \hat{\mu}_B - \hat{\mu}_C.
 $$
 For other scales on continuous data, the approach may involve transforming the means directly, although typical continuous outcome analyses focus on mean differences.
 
@@ -920,13 +881,13 @@ A difference from the previous binary outcome data example is the \texttt{family
 +   outstandR(ipd_trial = AC_IPD_contY_mixedX, 
 +             ald_trial = BC_ALD_contY_mixedX,
 +             strategy = strategy_maic(
-+               formula = list(outcome_model = "y ~ trt",
++               formula = list(outcome_model = formula("y ~ trt"),
 +                              balance_model = bal_form_mixedX),
 +               family = gaussian(link = "identity")),
 +             seed = 12345)
 \end{verbatim}
 
-Again, if we interrogate the output we see the same list format. Differences to the first example are the model and scale attributes correspond to the input data used. That is, the default output contrast is the mean difference.
+Again, if we interrogate the output we see the same list format. The differences from the first example are that the model and scale attributes correspond to the input data used. That is, the default output contrast is the mean difference.
 
 \begin{verbatim}
 > str(outstandR_maic, max.level = 1)
@@ -978,7 +939,7 @@ The corresponding calls to \texttt{outstandR()} for the other analyses follow si
 
 % 
 \subsubsection{Count outcome data}
-First, read in the two data sets.
+First, read in and view the two data sets.
 
 \begin{verbatim}
 > data(AC_IPD_countY_contX) # A vs C individual-level data
@@ -1019,6 +980,7 @@ First, read in the two data sets.
 % 16 NA        N         143     B    
 % \end{verbatim}
 
+The formats are the same as the binary outcome data example.
 Let $\lambda$ be the outcome event rate, then the equation for the outcome regression for the count data is
 $$
 \log(\lambda) = \beta_0 + \beta^{PF}_{1} X^{PF}_{1} + \beta^{PF}_{2 }X^{PF}_{2} + (\beta_{trt} + \beta^{EM}_{1} X^{EM}_{1} + + \beta^{EM}_{2} X^{EM}_{2}) \mathbb{I}(trt = 1).
@@ -1029,11 +991,11 @@ Recalling that the log link is defined separately in the \texttt{outstandR()} fu
 \paragraph{Relative treatment effects}
 The default relative effect with the log link is the log relative risk, with mean
 $$
-\Delta_{BC} = \ln(\bar{y}_C) - \ln(\bar{y}_B)
+\hat{\Delta}_{BC} = \ln(\hat{\mu}_B) - \ln(\hat{\mu}_C)
 $$ 
 and variance
 $$
-\text{Var}(\Delta_{BC}) = \frac{1}{N_B \bar{y}_B} + \frac{1}{N_C \bar{y}_C}
+\text{Var}(\Delta_{BC}) = \frac{1}{N_B \hat{\mu}_B} + \frac{1}{N_C \hat{\mu}_C}
 $$ 
 
 Table~\ref{tab:releff} gives the full list of potential relative effects for count outcome data.
@@ -1046,7 +1008,7 @@ A difference from the previous outcome data examples is the \texttt{family = poi
 +   outstandR(ipd_trial = AC_IPD_countY_contX,
 +             ald_trial = BC_ALD_countY_contX,
 +             strategy = strategy_maic(
-+               formula = list(outcome_model = "y ~ trt",
++               formula = list(outcome_model = formula("y ~ trt"),
 +                              balance_model = bal_form_contX),
 +               family = poisson(link = "log")),
 +             seed = 12345)
@@ -1099,19 +1061,19 @@ By default, \pkg{outstandR} reports treatment effects on the scale corresponding
         \midrule
         Binary 
           & Log Odds Ratio$^\dagger$ & $\text{logit}(p_B) - \text{logit}(p_C)$ & $\frac{1}{y_t} + \frac{1}{N_t - y_t}$ \\
-          & Risk Difference & $p_C - p_B$ & $\frac{p_t(1 - p_t)}{N_t}$ \\
-          & Probit Difference & $\text{probit}(p_C) - \text{probit}(p_B)$ & $\frac{1}{y_t} + \frac{1}{N_t - y_t}$ \\
-          & Log RR (cloglog) & $\ln(-\ln(1 - p_C)) - \ln(-\ln(1 - p_B))$ & $\frac{1}{y_t} - \frac{1}{N_t}$ \\
-          & Log RR (Log Link) & $\ln(p_C) - \ln(p_B)$ & $\frac{1}{y_t} - \frac{1}{N_t}$ \\
+          & Risk Difference & $p_B - p_C$ & $\frac{p_t(1 - p_t)}{N_t}$ \\
+          & Probit Difference & $\text{probit}(p_B) - \text{probit}(p_C)$ & $\frac{1}{y_t} + \frac{1}{N_t - y_t}$ \\
+          & Log RR (cloglog) & $\ln(-\ln(1 - p_B)) - \ln(-\ln(1 - p_C))$ & $\frac{1}{y_t} - \frac{1}{N_t}$ \\
+          & Log RR (Log Link) & $\ln(p_B) - \ln(p_C)$ & $\frac{1}{y_t} - \frac{1}{N_t}$ \\
         Count 
-          & Log Relative Risk$^\dagger$ & $\ln(\bar{y}_C) - \ln(\bar{y}_B)$ & $\frac{1}{N_t \bar{y}_t}$ \\
-          & Rate Difference & $\bar{y}_C - \bar{y}_B$ & $\frac{\bar{y}_t}{N_t}$ \\
-          % & Delta $z$ (Signal-to-noise) & $\sqrt{\bar{y}_C} - \sqrt{\bar{y}_B}$ & $\frac{1}{4 N_t \bar{y}_t}$ \\
+          & Log Relative Risk$^\dagger$ & $\ln(\hat{\mu}_B) - \ln(\hat{\mu}_C)$ & $\frac{1}{N_t \hat{\mu}_t}$ \\
+          & Rate Difference & $\hat{\mu}_B - \hat{\mu}_C$ & $\frac{\hat{\mu}_t}{N_t}$ \\
+          % & Delta $z$ (Signal-to-noise) & $\sqrt{\hat{\mu}_C} - \sqrt{\hat{\mu}_B}$ & $\frac{1}{4 N_t \hat{\mu}_t}$ \\
         Continuous 
-          & Mean Difference$^\dagger$ & $\bar{y}_B - \bar{y}_C$ & $\frac{s_t^2}{N_t}$ \\
+          & Mean Difference$^\dagger$ & $\hat{\mu}_B - \hat{\mu}_C$ & $\frac{s_t^2}{N_t}$ \\
         \bottomrule
     \end{tabular}
-    \caption{Relative treatment effect statistics for different outcome data types. For binary data, $y_t$ = events, $N_t$ = total patients. For count data, $\bar{y}_t$ = mean rate/count, $N_t$ = patients. $^\dagger$default.}
+    \caption{Relative treatment effect statistics for different outcome data types. For binary data, $y_t$ = events, $N_t$ = total patients. For count data, $\hat{\mu}_t$ = mean rate/count, $N_t$ = patients. $^\dagger$default in \pkg{outstandR}.}
         \label{tab:releff}
 \end{table}
 % Supported scales include ``log\_odds", ``odds\_ratio", ``log\_relative\_risk", ``relative\_risk", ``risk\_difference", ``mean\_difference", and ``rate\_difference".
@@ -1132,7 +1094,7 @@ For example, to obtain a risk difference instead of the default log-odds ratio f
 +   ipd_trial = AC_IPD_binY_contX, 
 +   ald_trial = BC_ALD_binY_contX,
 +   strategy = strategy_maic(
-+     formula = list(outcome_model = "y ~ trt",
++     formula = list(outcome_model = formula("y ~ trt"),
 +                    balance_model = bal_form_contX),
 +     family = binomial(link = "logit")),
 +   seed = 12345,
@@ -1182,7 +1144,7 @@ The package determines the validity of a conversion path based on the underlying
 Standard errors in population-adjusted analyses can be sensitive to model misspecification. Users can request robust (sandwich) standard errors (see Section~\ref{sec:variance_methods}) by setting the \code{var\_method} argument to \code{"sandwich"}. 
 % This is particularly useful for methods like STC and G-computation (ML) where the outcome model parameters directly drive the effect estimate.
 
-The following example demonstrates how to compare the naive model-based standard error with the robust sandwich estimate for an STC analysis:
+The following example demonstrates how to compare the naive model-based standard error with the robust sandwich estimate for a maximum likelihood g-computation analysis:
 
 \begin{verbatim}
 > # standard G-computation ML analysis (model-based variance)
@@ -1226,7 +1188,7 @@ By default, the simulation step in G-computation assumes that covariates in the 
 
 A key feature of this implementation is that the package automatically parameterizes these distributions using the summary statistics available in the ALD. For example, if a user specifies a Gamma distribution for \code{age}, \pkg{outstandR} will automatically retrieve the reported mean ($\mu$) and standard deviation ($\sigma$) from the ALD data frame and convert them into the required shape ($\alpha$) and rate ($\beta$) parameters using the method of moments:
 \begin{equation*}
-\alpha = (\mu / \sigma)^2, \quad \beta = \mu / \sigma^2
+\alpha = (\mu / \sigma)^2, \quad \beta = \mu / \sigma^2.
 \end{equation*}
 This is more robust and streamlines the workflow by removing the need for users to perform these statistical transformations manually.
 
@@ -1393,19 +1355,12 @@ The \pkg{outstandR} package offers a comprehensive and flexible toolset for addr
     \item Uncertainty quantification: The Bayesian G-computation approach provides a robust framework for propagating and quantifying uncertainty.
     \item Practical relevance: Directly addresses a critical need in health economics and evidence synthesis for comparing treatments when direct trial data is unavailable.
 \end{itemize}
-While powerful, \pkg{outstandR} relies on the correct specification of outcome models and the availability of sufficient aggregate-level data for reliable estimation. This is an active area of research. Future work will include expanding the range of supported outcome models and exploring more advanced covariate simulation techniques.
-The package’s modular S3 architecture was designed specifically to accommodate such extensions.
+While powerful, \pkg{outstandR} relies on the correct specification of outcome models and the availability of sufficient aggregate-level data for reliable estimation. For example, matching on higher-order moments with the MAIC approach may reduce bias by matching joint distributions, it drastically increases the parameters the optimizer must solve for - an example of the bias-variance trade-off - and commonly results in more extreme weights and a lower ESS.
+These are active areas of research. Future work will include expanding the range of supported outcome models and exploring more advanced covariate simulation techniques.
 
-% doubly-robust
-One such approach is that of so-called {\it doubly robust} estimators \cite{campbell2025}. These are methods which include both regression and weighting to allow for `two chances' of obtaining a correct model.
-%%TODO: talk about future proofed formula syntax in strategies
-% unanchored comparisons
-Also, we intend to implement specific standardization routines for {\it unanchored comparisons}. These are single-arm studies where a common comparator is absent.
-% networks of evidence
-The current approach compares a single IPD trial and ALD trial. This could be extended to take multiple trials of either type to form a large network of evidence; likely multiple ALD trials.
-% survival data
-Finally, time-to-event (survival) data will be implemented in a future version of \pkg{outstandR}. This type of data is important in HTA, such as in the field of oncology. We will use the established \texttt{Surv} object from the \pkg{survival} package \cite{survivalpkg}.
+The package’s modular S3 architecture and explicit two-part formula design (\texttt{outcome\_model} and \texttt{balance\_model}) were designed specifically to accommodate future methodological extensions. One such approach is that of so-called \textit{doubly robust} estimators \citep{campbell2025}. These methods combine regression and weighting to allow for `two chances' of obtaining a correct model; \pkg{outstandR}'s new formula architecture natively captures the necessary inputs for these upcoming methods.
 
+We also intend to implement functionality and workflows for the case when a common comparator is absent using single-arm studies called \textit{unanchored comparisons}. We will allow for the synthesis of multiple ALD trials into a wider network of evidence. Finally, while \pkg{outstandR} currently intercepts \texttt{Surv} objects with an informative error, comprehensive support for time-to-event (survival) data is officially scheduled for the upcoming release, leveraging the established \pkg{survival} package \citep{survivalpkg}.
 
 % \bibliographystyle{plainnat} % Or another suitable bibliography style like jss
 \bibliography{references} % Assumes .bib file is named 'references.bib'
